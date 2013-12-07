@@ -1,0 +1,79 @@
+<!doctype HTML>
+<html ng-app="email">
+  <head>
+    <title>Email Login</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.9.3/css/semantic.min.css" />
+    <link href='http://fonts.googleapis.com/css?family=Exo' rel='stylesheet' type='text/css'>
+    <style>
+      body, input, textarea {
+        font-family: Exo;
+      }
+      
+      #login {
+        max-width: 400px;
+        margin: 0 auto;
+        margin-top: 16%;
+      }
+    </style>
+  </head>
+  <body ng-controller="email">
+    <form id="login" class="ui form segment" ng-submit="login()" ng-hide="loggedIn" ng-class="{error: loginError}">
+      <header class="ui message">
+        bham.ac.uk email login
+      </header>
+      <div class="field">
+        <label>Username</label>
+        <div class="ui left labeled icon input">
+          <input type="text" ng-model="username" />
+          <i class="user icon"></i>
+        </div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <div class="ui left labeled icon input">
+          <input type="password" ng-model="password" />
+          <i class="lock icon"></i>
+         </div>
+      </div>
+      <div class="ui error message">
+        <p>Oops! Login failed.</p>
+        <p>Check your credentials.</p>
+      </div>
+      <input value="login" type="submit" class="ui blue button floated right" />
+    </form>
+    
+    <article ng-show="loggedIn">
+      <header class="ui attached message">
+        New Message
+      </header>
+      
+      <section class="ui attached form fluid segment">
+        <div class="ui left labeled icon input field">
+          <input placeholder="recipient" type="text" />
+          <i class="user icon"></i>
+        </div>
+      </section>
+      
+      <section class="ui attached form fluid segment">
+        <div class="ui left labeled icon input field">
+          <input placeholder="subject" type="text" />
+          <i class="chat icon"></i>
+        </div>
+        <div class="input field">
+          <textarea></textarea>
+        </div>
+        <div class="ui buttons floated right">
+          <div class="ui button">Cancel</div>
+          <div class="or"></div>
+          <div class="ui positive button">Send</div>
+        </div>
+      </section>
+    </article>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.9.3/javascript/semantic.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.1/angular.min.js"></script>
+    
+    <script src="js/email.js"></script>
+  </body>
+</html>
