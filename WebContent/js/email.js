@@ -28,8 +28,8 @@ angular.module("email", [])
   })
   .factory("modal", function() {
 	// Shows the "message sent" dialog
-    return function() {
-      $('.ui.modal').modal("show");
+    return function(which) {
+      $('.ui.modal.' + which).modal("show");
     };
   })
   .controller("email", function($scope, mail, modal) {
@@ -62,8 +62,6 @@ angular.module("email", [])
       mail.checkAuth({user: $scope.username, pass: $scope.password}, fail, success);
     };
     
-    var noop = function () {$scope.sending = false;};
-    
     $scope.send = function() {
       var success = function () {
     	  // On success, reset form and show message
@@ -71,15 +69,20 @@ angular.module("email", [])
     	  $scope.subject = "";
     	  $scope.message = "";
     	  $scope.sending = false;
-    	  modal();
+    	  modal('success');
       };
+      var fail = function () {
+    	  $scope.sending = false;
+    	  modal('fail');
+      };
+      
       $scope.sending = true;
 
       mail.send({user: $scope.username, pass: $scope.password}, {
         to: $scope.to.split(/,? +/),
         subject: $scope.subject,
         message: $scope.message
-      }, noop, success);
+      }, fail, success);
     };	
   })
   ;
