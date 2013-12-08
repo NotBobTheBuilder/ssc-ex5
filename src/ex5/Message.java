@@ -1,6 +1,7 @@
 package ex5;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.mail.MessagingException;
@@ -11,6 +12,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
@@ -23,14 +28,6 @@ import ex5.mx.SMTP;
 public class Message extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public Message() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -46,7 +43,26 @@ public class Message extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		JsonObject data = new JsonParser().parse(request.getReader()).getAsJsonObject();
+		
+		String message = data.get("message").getAsString();
+		String subject = data.get("subject").getAsString();
+		
+		JsonArray json_to = data.get("to").getAsJsonArray();
+		ArrayList<String> recipients = new ArrayList<String>();
+		for (JsonElement i : json_to)
+			recipients.add(i.getAsString());
+		
+		SMTP smtp = checkAuth(request, response);
+		if (smtp == null)
+			return;
+		
+		try {
+			smtp.send(recipients.get(0), "", "", subject, "", message);
+		} catch (MessagingException e) {
+			send(response, 500, "Error sending message; try again");	
+		}
+		send(response, 202, "");
 	}
 	
 	private void send(HttpServletResponse response, int status, String message) throws IOException {
@@ -54,10 +70,6 @@ public class Message extends HttpServlet {
 		response.getOutputStream().println(message);
 	}
 	
-	private void send(HttpServletResponse response, String message) throws IOException {
-		response.getOutputStream().println(message);
-	}
-
 	private SMTP checkAuth(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String auth = request.getHeader("Authorization");
 		
@@ -99,6 +111,7 @@ public class Message extends HttpServlet {
 		Properties p = new Properties();
 	
 		p.setProperty("mail.user", username);
+		p.setProperty("mail.address", username + "@bham.ac.uk");
 		p.setProperty("mail.password", password);
 		p.setProperty("mail.smtp.host", "auth-smtp.bham.ac.uk");
 		p.setProperty("mail.smtp.auth", "true");
