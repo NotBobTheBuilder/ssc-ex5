@@ -10,14 +10,20 @@
       }
       
       #login {
-        max-width: 400px;
         margin: 0 auto;
-        margin-top: 16%;
+        max-width: 300px;
+        margin-top: 15%;
+      }
+      
+      #message {
+        margin: 0 auto;
+        max-width: 600px;
+        margin-top: 15%;
       }
     </style>
   </head>
   <body ng-controller="email">
-    <form id="login" class="ui form segment" ng-submit="login()" ng-hide="loggedIn" ng-class="{error: loginError}">
+    <form id="login" class="ui form segment" ng-submit="login()" ng-hide="loggedIn" ng-class="{error: loginError, loading: loading}">
       <header class="ui message">
         bham.ac.uk email login
       </header>
@@ -33,7 +39,7 @@
         <div class="ui left labeled icon input">
           <input type="password" ng-model="password" />
           <i class="lock icon"></i>
-         </div>
+        </div>
       </div>
       <div class="ui error message">
         <p>Oops! Login failed.</p>
@@ -42,33 +48,33 @@
       <input value="login" type="submit" class="ui blue button floated right" />
     </form>
     
-    <article ng-show="loggedIn">
+    <form id="message" class="ui form floated center" ng-submit="send()" ng-show="loggedIn" ng-class="{loading: sending}">
       <header class="ui attached message">
         New Message
       </header>
       
       <section class="ui attached form fluid segment">
         <div class="ui left labeled icon input field">
-          <input placeholder="recipient" type="text" />
+          <input placeholder="recipient" type="text" ng-model="to"/>
           <i class="user icon"></i>
         </div>
       </section>
       
       <section class="ui attached form fluid segment">
         <div class="ui left labeled icon input field">
-          <input placeholder="subject" type="text" />
+          <input placeholder="subject" type="text" ng-model="subject"/>
           <i class="chat icon"></i>
         </div>
         <div class="input field">
-          <textarea></textarea>
+          <textarea ng-model="message"></textarea>
         </div>
         <div class="ui buttons floated right">
-          <div class="ui button">Cancel</div>
+          <input type="reset" value="Cancel" class="ui button" />
           <div class="or"></div>
-          <div class="ui positive button">Send</div>
+          <input type="submit" value="Send" class="ui positive button" />
         </div>
       </section>
-    </article>
+    </form>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.9.3/javascript/semantic.min.js"></script>
