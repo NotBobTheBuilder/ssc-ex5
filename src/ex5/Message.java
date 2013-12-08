@@ -22,27 +22,55 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 import ex5.mx.SMTP;
 
 /**
- * Servlet implementation class Message
+ * Servlet implementation class Message.
+ * Provides a JSON API for sending messages and checking credentials.
+ * Uses HTTP Basic Authentication for credential handling
  */
 @WebServlet("/messages")
 public class Message extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
        
 	/**
+	 * Verify that sent credentials are correct
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @throws ServletException the servlet exception
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		SMTP auth = checkAuth(request, response);
 		if (auth == null)
 			return;
-		
+		// Appropriate invalid headers are already sent. Reaching here means we're OK.
 		send(response, 200, "");
 	}
 
 	/**
+	 * Handle a POST request - send an email.
+	 *
+	 * @param request Request object
+	 * @param response Response object
+	 * @throws ServletException the servlet exception
+	 * @throws IOException Signals that an I/O exception has occurred.
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		/*
+		 *  We parse a JSON object (using GSON API) with structure like so:
+		 *  {
+		 *    "message" : "message body",
+		 *    "subject" : "subject",
+		 *    "to" : ["recipient1@example.org", "recipient2@example.org"]
+		 *  }
+		 *  these are held in:
+		 *  - String message
+		 *  - String subject
+		 *  - ArrayList<String> to
+		 */
 		JsonObject data = new JsonParser().parse(request.getReader()).getAsJsonObject();
 		
 		String message = data.get("message").getAsString();
@@ -62,14 +90,32 @@ public class Message extends HttpServlet {
 		} catch (MessagingException e) {
 			send(response, 500, "Error sending message; try again");	
 		}
+		//If we made it this far, the message has been sent
 		send(response, 202, "");
 	}
 	
+	/**
+	 * Send a HTTP status code and message
+	 *
+	 * @param response the HTTPServletResponse instance to respond with
+	 * @param status HTTP status code to send
+	 * @param message HTTP message body
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	private void send(HttpServletResponse response, int status, String message) throws IOException {
 		response.setStatus(status);
 		response.getOutputStream().println(message);
 	}
 	
+	/**
+	 * Attempt to construct an SMTP class for sending email. If this fails, send an appropriate HTTP error code & message
+	 *
+	 * @param request HTTP Servlet request, needed for credentials
+	 * @param response HTTP Response object - used to send errors if needed.
+	 * @return a working SMTP instance, or null (indicating an error has already been sent)
+	 * @throws ServletException
+	 * @throws IOException
+	 */
 	private SMTP checkAuth(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String auth = request.getHeader("Authorization");
 		
@@ -107,6 +153,13 @@ public class Message extends HttpServlet {
 		return null;
 	}
 	
+	/**
+	 * Create a properties object for bham.ac.uk email using user credentials
+	 *
+	 * @param username - the username of the account to send from
+	 * @param password - the password of the account to send from
+	 * @return the settings
+	 */
 	private Properties getSettings(String username, String password) {
 		Properties p = new Properties();
 	
