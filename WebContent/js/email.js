@@ -19,7 +19,12 @@ angular.module("email", [])
       }
     };
   })
-  .controller("email", function($scope, mail) {
+  .factory("modal", function() {
+    return function() {
+      $('.ui.modal').modal("show");
+    };
+  })
+  .controller("email", function($scope, mail, modal) {
     $scope.loggedIn   = false;
     $scope.loginError = false;
     $scope.sentModal  = 'hide';
@@ -48,17 +53,20 @@ angular.module("email", [])
     var noop = function () {$scope.sending = false;};
     
     $scope.send = function() {
-      $scope.sending = true;
-      mail.send({user: $scope.username, pass: $scope.password}, {
-        to: $scope.to.split(/,? +/),
-        subject: $scope.subject,
-        message: $scope.message
-      }, noop, function () {
+      var success = function () {
     	  $scope.to = "";
     	  $scope.subject = "";
     	  $scope.message = "";
     	  $scope.sending = false;
-      });
+    	  modal();
+      };
+      $scope.sending = true;
+
+      mail.send({user: $scope.username, pass: $scope.password}, {
+        to: $scope.to.split(/,? +/),
+        subject: $scope.subject,
+        message: $scope.message
+      }, noop, success);
     };	
   })
   ;
