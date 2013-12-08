@@ -1,7 +1,12 @@
 angular.module("email", [])
   .factory("mail", function($http) {
+	/*
+	 * This service handles the sending of messages & authentication
+	 * Provides checkAuth and send methods which connect to JSON API
+	 */
     return {
       checkAuth: function CheckAuth (creds, fail, success) {
+    	//add auth header
         var authstring = "Basic " + btoa(creds.user + ":" + creds.pass);
         $http.defaults.headers.common.Authorization = authstring; 
 
@@ -10,9 +15,11 @@ angular.module("email", [])
           .error(fail);
         },
       send: function Send (creds, message, fail, success) {
+    	//add auth header
         var authstring = "Basic " + btoa(creds.user + ":" + creds.pass);
         $http.defaults.headers.common.Authorization = authstring; 
 
+        //send our message in JSON form to our API endpoint
         $http.post("messages", message)
           .success(success)
           .error(fail);
@@ -20,14 +27,17 @@ angular.module("email", [])
     };
   })
   .factory("modal", function() {
+	// Shows the "message sent" dialog
     return function() {
       $('.ui.modal').modal("show");
     };
   })
   .controller("email", function($scope, mail, modal) {
+	// main page logic.
+	  
+	// set initial states:
     $scope.loggedIn   = false;
     $scope.loginError = false;
-    $scope.sentModal  = 'hide';
     $scope.sending    = false;
     $scope.loading    = false;
     
@@ -35,6 +45,7 @@ angular.module("email", [])
     $scope.password = "";
     
     $scope.login = function() {
+      // run when login form submitted
       function setState(success) {
         return function () {
           $scope.loggedIn   = success;
@@ -43,6 +54,7 @@ angular.module("email", [])
         };
       }
 
+      // build callbacks to set form states
       var success = setState(true);
       var fail    = setState(false);
 
@@ -54,6 +66,7 @@ angular.module("email", [])
     
     $scope.send = function() {
       var success = function () {
+    	  // On success, reset form and show message
     	  $scope.to = "";
     	  $scope.subject = "";
     	  $scope.message = "";
